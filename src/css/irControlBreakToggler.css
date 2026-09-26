@@ -1,0 +1,9 @@
+.ir-control-break-btn--start {
+  float: inline-start;
+  margin-inline-end: .5rem;
+}
+
+.ir-control-break-btn--end {
+  float: inline-end;
+  margin-inline-start: .5rem;
+}

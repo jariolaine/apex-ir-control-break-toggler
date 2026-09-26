@@ -1,0 +1,25 @@
+{
+  "name": "apex-ir-control-break-toggler",
+  "version": "1.0.0",
+  "private": true,
+  "license": "MIT",
+  "scripts": {
+    "lint": "npm run lint:js && npm run lint:css && npm run lint:md",
+    "lint:js": "eslint \"src/js/**/*.js\"",
+    "lint:css": "stylelint \"src/css/**/*.css\"",
+    "lint:md": "markdownlint-cli2 \"**/*.md\" \"#node_modules\"",
+    "lint:fix": "npm run lint:js:fix && npm run lint:css:fix && npm run lint:md:fix",
+    "lint:js:fix": "eslint \"src/js/**/*.js\" --fix",
+    "lint:css:fix": "stylelint \"src/css/**/*.css\" --fix",
+    "lint:md:fix": "markdownlint-cli2 --fix \"**/*.md\" \"#node_modules\"",
+    "check:js": "node --check src/js/irControlBreakToggler.js"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "eslint": "^10.11.0",
+    "globals": "^17.12.0",
+    "markdownlint-cli2": "^0.23.3",
+    "stylelint": "^17.15.0",
+    "stylelint-config-standard": "^40.0.0"
+  }
+}
