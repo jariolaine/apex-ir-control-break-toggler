@@ -7,7 +7,7 @@ adds expand/collapse controls to control-break groups in an Interactive Report.
 
 - Oracle APEX 26.1 or later
 - Interactive Report regions
-- Plug-in version: **1.0.0**
+- Plug-in version: **1.0.1**
 
 ## Features
 
@@ -17,13 +17,13 @@ adds expand/collapse controls to control-break groups in an Interactive Report.
 - Can remember the state of individual control-break groups.
 - Supports session-based and persistent browser storage.
 - Supports logical start or end button positioning, including RTL layouts.
-- Provides application-scope attributes for button titles, icons, and CSS
-  classes.
-- Provides component-scope settings for initial state, remembered state, and
-  button position.
+- Provides application-scope attributes for button titles, icons, and
+  CSS classes.
+- Provides component-scope settings for initial state, remembered state,
+  and button position.
 - Maintains `aria-expanded` and accessible button labels.
-- Adds `aria-controls` relationships between each toggle button and the rows it
-  controls.
+- Adds `aria-controls` relationships between each toggle button and the rows
+  it controls.
 - Provides public JavaScript API methods to expand all groups, collapse all
   groups, and reset remembered state for an individual report region.
 - Exposes the **Control Break Change** Dynamic Action event when control-break
@@ -33,7 +33,8 @@ adds expand/collapse controls to control-break groups in an Interactive Report.
 
 ## Usage
 
-The Dynamic Action must be created on the Interactive Report region.
+For a typical single Interactive Report, create the Dynamic Action on the
+report region.
 
 Configure it as follows:
 
@@ -41,7 +42,7 @@ Configure it as follows:
 | --- | --- |
 | Event | **After Refresh** |
 | Selection Type | **Region** |
-| Region | Your Interactive Report |
+| Region | *Your Interactive Report* |
 
 Add a True Action and configure it as follows:
 
@@ -50,13 +51,17 @@ Add a True Action and configure it as follows:
 | Action | **IR Control Break Toggler [Plug-In]** |
 | Fire on Initialization | **Yes** |
 
-The plug-in operates on the Interactive Report that triggers the Dynamic
-Action. No Affected Elements configuration is required.
+The plug-in operates on the Interactive Report that triggers the Dynamic Action.
+No Affected Elements configuration is required.
 
 The plug-in runs when the page loads and after the Interactive Report is
 refreshed, adding a toggle button to each control-break header.
 
 If the report contains no control breaks, the plug-in makes no changes.
+
+Initialization can also receive multiple matched region elements, for example
+from a Dynamic Action that uses a jQuery Selector. Each matched report is
+initialized as an independent plug-in instance.
 
 ## Component Settings
 
@@ -99,8 +104,8 @@ navigation during the current browser session.
 Persistent storage survives browser restarts until the browser storage is
 cleared or the plug-in configuration invalidates the stored state.
 
-Persistent state belongs to the current browser and browser profile. It does
-not follow the authenticated user to another browser or device.
+Persistent state belongs to the current browser and browser profile.
+It does not follow the authenticated user to another browser or device.
 
 ### Button Position
 
@@ -165,7 +170,11 @@ The plug-in:
   by that control break.
 
 If a controlled row does not already have an `id`, the plug-in assigns one so
-it can be referenced by `aria-controls`.
+it can be referenced by `aria-controls`. Existing row IDs are preserved.
+
+Generated row IDs only need to identify elements in the currently rendered
+report markup. Reusing the same generated IDs after Interactive Report
+pagination is valid because the previous page rows have been replaced.
 
 Use short, action-oriented values for **Collapse Title** and **Expand Title**,
 for example `Collapse` and `Expand`.
@@ -175,17 +184,19 @@ for example `Collapse` and `Expand`.
 Remembered state is scoped to the application, page, and Interactive Report
 region.
 
-Each control-break group is identified by the `id` of its control-break
-header.
+APEX-generated control-break header IDs are not used as persistent state keys
+because those IDs can be reused when the report is paginated. Instead,
+the plug-in uses a logical key derived from the rendered control-break
+header text.
 
 The stored data includes:
 
 - A storage format version.
 - The configured **Initially Expanded** value.
-- The remembered expanded/collapsed state for each control-break header.
+- The remembered expanded/collapsed state for each control-break group.
 
-The configured **Initially Expanded** value is stored as metadata. If that
-setting changes, old remembered group states are discarded automatically.
+The configured **Initially Expanded** value is stored as metadata.
+If that setting changes, old remembered group states are discarded automatically.
 
 ### Storage Modes
 
@@ -193,18 +204,17 @@ setting changes, old remembered group states are discarded automatically.
 
 **Future Sessions** uses scoped `localStorage`.
 
-The stored state is client-side UI state. Persistent storage is associated
-with the current browser profile and is not an APEX user preference.
+The stored state is client-side UI state. Persistent storage is associated with
+the current browser profile and is not an APEX user preference.
 
 ## Refresh Behavior
 
-Interactive Report refreshes replace the generated report markup, so the
-toggle buttons and ARIA relationships are recreated after each refresh.
+Interactive Report refreshes replace the generated report markup, so the toggle
+buttons and ARIA relationships are recreated after each refresh.
 
 The plug-in is safe to initialize repeatedly:
 
-- Existing namespaced click handlers are removed before a new handler is
-  attached.
+- Existing namespaced click handlers are removed before a new handler is attached.
 - Toggle buttons are only added when they do not already exist.
 - Remembered group states are restored after refresh.
 
@@ -230,8 +240,8 @@ fi_jaris_plugin.ir.controlBreakToggler.init(
 );
 ```
 
-`init` can initialize one region or multiple matched region elements. Each
-region is maintained as an independent plug-in instance.
+`init` can initialize one region or multiple matched region elements.
+Each region is maintained as an independent plug-in instance.
 
 The APEX Dynamic Action entry point uses the triggering region:
 
@@ -288,8 +298,7 @@ change state.
 
 ### Reset State
 
-Clears remembered state and restores the configured **Initially Expanded**
-state.
+Clears remembered state and restores the configured **Initially Expanded** state.
 
 ```javascript
 fi_jaris_plugin.ir.controlBreakToggler.resetState(
@@ -316,7 +325,7 @@ Create a button and configure its **Trigger Action** as follows:
 | --- | --- |
 | Triggered Action | **Execute JavaScript Code** |
 | Selection Type | **Region** |
-| Region | Your Interactive Report |
+| Region | *Your Interactive Report* |
 
 JavaScript Code:
 
@@ -334,7 +343,7 @@ Create another button with the same **Trigger Action** configuration:
 | --- | --- |
 | Triggered Action | **Execute JavaScript Code** |
 | Selection Type | **Region** |
-| Region | Your Interactive Report |
+| Region | *Your Interactive Report* |
 
 JavaScript Code:
 
@@ -353,7 +362,7 @@ state:
 | --- | --- |
 | Triggered Action | **Execute JavaScript Code** |
 | Selection Type | **Region** |
-| Region | Your Interactive Report |
+| Region | *Your Interactive Report* |
 
 JavaScript Code:
 
@@ -363,9 +372,9 @@ fi_jaris_plugin.ir.controlBreakToggler.resetState(
 );
 ```
 
-Using `this.affectedElements` avoids hard-coding the Interactive Report Static
-ID in the JavaScript. The selected region is passed directly to the plug-in
-public API method.
+Using `this.affectedElements` avoids hard-coding the Interactive Report
+Static ID in the JavaScript. The selected region is passed directly to the
+plug-in public API method.
 
 ## Dynamic Action Event
 
@@ -388,8 +397,8 @@ A user toggling an individual control-break group raises one event for that
 group.
 
 The `expandAll`, `collapseAll`, and `resetState` public API methods raise one
-aggregate event after all affected groups have been processed, provided at
-least one group changed state.
+aggregate event after all affected groups have been processed, provided at least
+one group changed state.
 
 State restoration during initialization or after an Interactive Report refresh
 does not raise the event.
@@ -401,9 +410,13 @@ The event provides the following data:
 | Property | Description |
 | --- | --- |
 | `regionId` | Static ID of the Interactive Report region |
-| `headerIds` | Array containing all control-break header IDs changed by the operation |
+| `headerIds` | Array containing the IDs of all currently rendered control-break headers changed by the operation |
 | `expanded` | `true` when groups were expanded, `false` when groups were collapsed |
 | `source` | Source of the state change |
+
+The `headerIds` values refer to the current report DOM. They are useful for
+identifying the affected rendered headers but are not used as persistent
+group identifiers.
 
 Possible `source` values are:
 
@@ -416,42 +429,35 @@ Possible `source` values are:
 
 ### Using the Event in a Dynamic Action
 
-Create a Dynamic Action on the Interactive Report region and select the
-plug-in event directly.
+Create a Dynamic Action on the Interactive Report region and select the plug-in
+event directly.
 
 | Property | Value |
 | --- | --- |
 | Event | `Control Break Change [IR Control Break Toggler]` |
 | Selection Type | **Region** |
-| Region | Your Interactive Report |
+| Region | *Your Interactive Report* |
 
 ## Button Position Styling
 
-The plug-in applies position-specific classes to the generated button:
+The plug-in keeps the Interactive Report `<th>` as a normal table cell and
+creates an inner flex container for the control-break content and toggle button.
+
+The generated layout classes are:
 
 ```text
-ir-control-break-btn--start
-ir-control-break-btn--end
+ir-control-break-header
+ir-control-break-header--start
+ir-control-break-header--end
+ir-control-break-text
+ir-control-break-btn
 ```
 
-These classes can be used to align the button to the logical start or end of
-the control-break header.
+For **Start**, the button is inserted before the header text. For **End**,
+the button is inserted after the header text and pushed to the logical end of
+the flex container.
 
-For example:
-
-```css
-.ir-control-break-btn--start {
-  float: inline-start;
-  margin-inline-end: .5rem;
-}
-
-.ir-control-break-btn--end {
-  float: inline-end;
-  margin-inline-start: .5rem;
-}
-```
-
-Using logical CSS properties keeps the layout compatible with both
+This avoids changing the table-cell layout itself and works with both
 left-to-right and right-to-left page directions.
 
 ## Implementation Notes
@@ -462,17 +468,19 @@ The plug-in targets Interactive Report control-break headers using:
 th.a-IRR-header--group
 ```
 
-The generated button uses the internal class:
+The generated header layout uses:
+
+```text
+ir-control-break-header
+ir-control-break-header--start
+ir-control-break-header--end
+ir-control-break-text
+```
+
+The generated button uses:
 
 ```text
 ir-control-break-btn
-```
-
-Position-specific classes are:
-
-```text
-ir-control-break-btn--start
-ir-control-break-btn--end
 ```
 
 The generated icon uses:
@@ -492,9 +500,12 @@ Remembered state uses APEX scoped browser storage:
 - Session mode uses scoped `sessionStorage`.
 - Persistent mode uses scoped `localStorage`.
 
+Persistent state uses a logical group key rather than the pagination-local
+APEX control-break header DOM ID.
+
 Because the plug-in relies on generated Oracle APEX Interactive Report markup,
 test it when upgrading to a newer APEX release.
 
 ## License
 
-This code is released under [MIT license](https://raw.githubusercontent.com/jariolaine/apex-ir-control-break-toggler/master/LICENSE) by Jari Laine.
+This code is released under the [MIT license](https://raw.githubusercontent.com/jariolaine/apex-ir-control-break-toggler/master/LICENSE) by Jari Laine.
