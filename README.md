@@ -497,4 +497,4 @@ test it when upgrading to a newer APEX release.
 
 ## License
 
-MIT License. See `LICENSE`.
+This code is released under [MIT license](https://raw.githubusercontent.com/jariolaine/apex-ir-control-break-toggler/master/LICENSE) by Jari Laine.

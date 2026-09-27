@@ -1,9 +1,14 @@
-.ir-control-break-btn--start {
-  float: inline-start;
-  margin-inline-end: .5rem;
+.ir-control-break-header {
+  display: flex;
+  align-items: center;
+  inline-size: 100%;
+  gap: .5rem;
 }
 
-.ir-control-break-btn--end {
-  float: inline-end;
-  margin-inline-start: .5rem;
+.ir-control-break-text {
+  min-inline-size: 0;
+}
+
+.ir-control-break-header--end .ir-control-break-btn {
+  margin-inline-start: auto;
 }
