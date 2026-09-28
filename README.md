@@ -7,7 +7,7 @@ adds expand/collapse controls to control-break groups in an Interactive Report.
 
 - Oracle APEX 26.1 or later
 - Interactive Report regions
-- Plug-in version: **1.0.1**
+- Plug-in version: **1.0.2**
 
 ## Features
 
@@ -227,34 +227,6 @@ The plug-in exposes a public API under:
 
 ```javascript
 fi_jaris_plugin.ir.controlBreakToggler
-```
-
-### Initialize
-
-Initialization is normally handled automatically by the Dynamic Action.
-
-```javascript
-fi_jaris_plugin.ir.controlBreakToggler.init(
-  region,
-  options
-);
-```
-
-`init` can initialize one region or multiple matched region elements.
-Each region is maintained as an independent plug-in instance.
-
-The APEX Dynamic Action entry point uses the triggering region:
-
-```javascript
-window.irControlBreakTogglerInit = (
-  settings,
-  daConfig
-) => {
-  fi_jaris_plugin.ir.controlBreakToggler.init(
-    daConfig.triggeringElement,
-    settings
-  );
-};
 ```
 
 ### Single-Region API Methods

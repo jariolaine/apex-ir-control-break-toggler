@@ -27,18 +27,11 @@ var fi_jaris_plugin = fi_jaris_plugin || {};
   const HEADER_CONTENT_SELECTOR =
     ".ir-control-break-header";
 
+  const BUTTON_EVENT_HANDLER =
+    "click.controlBreakToggle";
+
   const CHANGE_EVENT =
     "ircontrolbreakchange";
-
-  const DEFAULTS = {
-    initiallyExpanded : true,
-    rememberState     : "NO",
-    buttonPosition    : "START",
-    collapseTitle     : apex.lang.getMessage("APEX.GV.BREAK_COLLAPSE") || "Collapse",
-    expandTitle       : apex.lang.getMessage("APEX.GV.BREAK_EXPAND") || "Expand",
-    collapseIcon      : "fa-chevron-down",
-    buttonCssClasses  : "t-Button t-Button--noLabel t-Button--icon t-Button--small"
-  };
 
 
   /*
@@ -119,151 +112,6 @@ var fi_jaris_plugin = fi_jaris_plugin || {};
 
   }
 
-
-  /*
-   * Normalize Remember State.
-   *
-   * Supported values:
-   *
-   *   NO
-   *   SESSION
-   *   PERSISTENT
-   */
-  function normalizeRememberState(value) {
-
-    /*
-     * Keep support for an older Boolean configuration.
-     */
-    if (value === true) {
-      return "SESSION";
-    }
-
-    if (
-      value === false ||
-      value == null
-    ) {
-      return "NO";
-    }
-
-    const normalizedValue =
-      String(value).toUpperCase();
-
-    return [
-      "NO",
-      "SESSION",
-      "PERSISTENT"
-    ].includes(normalizedValue)
-      ? normalizedValue
-      : "NO";
-
-  }
-
-
-  /*
-   * Normalize Button Position.
-   *
-   * Supported values:
-   *
-   *   START
-   *   END
-   */
-  function normalizeButtonPosition(value) {
-
-    const position =
-      String(
-        value || "START"
-      ).toUpperCase();
-
-    return position === "END"
-      ? "END"
-      : "START";
-
-  }
-
-
-  /*
-   * Merge supplied plug-in settings with defaults.
-   */
-  function normalizeOptions(options) {
-
-    const normalized =
-      $.extend(
-        {},
-        DEFAULTS,
-        options
-      );
-
-    normalized.rememberState =
-      normalizeRememberState(
-        normalized.rememberState
-      );
-
-    normalized.buttonPosition =
-      normalizeButtonPosition(
-        normalized.buttonPosition
-      );
-
-    normalized.collapseTitle =
-      normalized.collapseTitle ||
-      DEFAULTS.collapseTitle;
-
-    normalized.expandTitle =
-      normalized.expandTitle ||
-      DEFAULTS.expandTitle;
-
-    normalized.collapseIcon =
-      normalized.collapseIcon ||
-      DEFAULTS.collapseIcon;
-
-    /*
-     * Keep expandIcon null when no explicit value is supplied.
-     *
-     * initInstance() will derive the correct directional icon
-     * from Button Position and the region text direction.
-     */
-    normalized.expandIcon =
-      normalized.expandIcon ||
-      null;
-
-    normalized.buttonCssClasses =
-      normalized.buttonCssClasses ||
-      DEFAULTS.buttonCssClasses;
-
-    return normalized;
-
-  }
-
-
-  /*
-   * Used to return hashed group key.
-   */
-  function hashString(value) {
-
-    let hash =
-      0x811c9dc5;
-
-    for (
-      let i = 0;
-      i < value.length;
-      i += 1
-    ) {
-
-      hash ^=
-        value.charCodeAt(i);
-
-      hash =
-        Math.imul(
-          hash,
-          0x01000193
-        );
-
-    }
-
-    return (
-      hash >>> 0
-    ).toString(16);
-
-  }
 
   /*
    * Return APEX scoped browser storage.
@@ -489,9 +337,43 @@ var fi_jaris_plugin = fi_jaris_plugin || {};
 
 
   /*
+   * Return a compact deterministic hash for a string.
+   */
+  function hashString(value) {
+
+    let hash =
+      0x811c9dc5;
+
+    for (
+      let index = 0;
+      index < value.length;
+      index += 1
+    ) {
+
+      hash ^=
+        value.charCodeAt(index);
+
+      hash =
+        Math.imul(
+          hash,
+          0x01000193
+        );
+
+    }
+
+    return (
+      hash >>> 0
+    ).toString(16);
+
+  }
+
+
+  /*
    * APEX-generated control-break header IDs are pagination-local
-   * and can be reused on another report page. Use normalized
-   * rendered control-break text as the logical group identity.
+   * and can be reused on another report page.
+   *
+   * Use normalized rendered control-break text as the logical group
+   * identity and hash it before using it as a browser-storage key.
    */
   function getGroupKey(header$) {
 
@@ -504,18 +386,20 @@ var fi_jaris_plugin = fi_jaris_plugin || {};
       )
       .remove();
 
-    const value =
+    const headerText =
       clone$
-      .text()
-      .replace(
-        /\s+/g,
-        " "
-      )
-      .trim();
+        .text()
+        .replace(
+          /\s+/g,
+          " "
+        )
+        .trim();
 
-    return hashString(
-      value
-    );
+    return headerText
+      ? hashString(
+          headerText
+        )
+      : "";
 
   }
 
@@ -625,9 +509,8 @@ var fi_jaris_plugin = fi_jaris_plugin || {};
   /*
    * Ensure the control-break header has an inner layout container.
    *
-   * The <th> remains a table cell. Only the generated inner container
-   * uses flexbox, avoiding the vertical-alignment issues caused by
-   * floating the button directly inside the table cell.
+   * The <th> remains a table cell. Only the generated inner
+   * container uses flexbox.
    */
   function ensureHeaderContent(header$) {
 
@@ -647,7 +530,9 @@ var fi_jaris_plugin = fi_jaris_plugin || {};
     const existingButton$ =
       header$.children(
         BUTTON_SELECTOR
-      ).first().detach();
+      )
+        .first()
+        .detach();
 
     const text$ =
       $("<span>", {
@@ -870,10 +755,10 @@ var fi_jaris_plugin = fi_jaris_plugin || {};
    * Trigger one region-level change event.
    *
    * USER:
-   *   One group key.
+   *   One current control-break header ID.
    *
    * EXPAND_ALL / COLLAPSE_ALL / RESET:
-   *   All changed group keys in one event.
+   *   All changed current control-break header IDs in one event.
    */
   function triggerChangeEvent(
     instance,
@@ -911,13 +796,8 @@ var fi_jaris_plugin = fi_jaris_plugin || {};
    * Storage is written by the caller so that bulk operations
    * only need to write once.
    *
-   * eventSource:
-   *
-   *   USER
-   *   null
-   *
-   * Bulk operations pass null here and emit one aggregate
-   * event after all groups have been processed.
+   * Bulk operations pass null for eventSource and emit one
+   * aggregate event after all groups have been processed.
    */
   function setGroupExpanded(
     instance,
@@ -940,6 +820,11 @@ var fi_jaris_plugin = fi_jaris_plugin || {};
     const groupKey =
       getGroupKey(
         header$
+      );
+
+    const headerId =
+      header$.attr(
+        "id"
       );
 
     setButtonState(
@@ -977,11 +862,6 @@ var fi_jaris_plugin = fi_jaris_plugin || {};
       changed &&
       eventSource
     ) {
-
-      const headerId =
-        header$.attr(
-          "id"
-        );
 
       triggerChangeEvent(
         instance,
@@ -1085,10 +965,10 @@ var fi_jaris_plugin = fi_jaris_plugin || {};
 
     instance.region$
       .off(
-        "click.controlBreakToggle"
+        BUTTON_EVENT_HANDLER
       )
       .on(
-        "click.controlBreakToggle",
+        BUTTON_EVENT_HANDLER,
         BUTTON_SELECTOR,
         function() {
 
@@ -1152,6 +1032,12 @@ var fi_jaris_plugin = fi_jaris_plugin || {};
 
   /*
    * Initialize one Interactive Report region.
+   *
+   * Plug-in settings are already normalized and defaulted by
+   * the APEX plug-in definition and render procedure.
+   *
+   * A per-region copy is used because an empty Expand Icon is
+   * resolved from the current region's text direction.
    */
   function initInstance(
     region,
@@ -1166,8 +1052,9 @@ var fi_jaris_plugin = fi_jaris_plugin || {};
     }
 
 
-    const normalizedOptions =
-      normalizeOptions(
+    const instanceOptions =
+      $.extend(
+        {},
         options
       );
 
@@ -1179,12 +1066,12 @@ var fi_jaris_plugin = fi_jaris_plugin || {};
      * - Button Position
      * - LTR / RTL direction
      */
-    if (!normalizedOptions.expandIcon) {
+    if (!instanceOptions.expandIcon) {
 
-      normalizedOptions.expandIcon =
+      instanceOptions.expandIcon =
         getDefaultExpandIcon(
           region$,
-          normalizedOptions.buttonPosition
+          instanceOptions.buttonPosition
         );
 
     }
@@ -1203,12 +1090,12 @@ var fi_jaris_plugin = fi_jaris_plugin || {};
         regionId,
 
       options:
-        normalizedOptions,
+        instanceOptions,
 
       stateStorage:
         getStateStorage(
           regionId,
-          normalizedOptions.rememberState
+          instanceOptions.rememberState
         ),
 
       storedState:
@@ -1318,11 +1205,12 @@ var fi_jaris_plugin = fi_jaris_plugin || {};
       return false;
     }
 
+
     const changedHeaderIds =
       [];
 
-    const changedGroupKeys =
-      [];
+    let changedAny =
+      false;
 
 
     getBreakHeaders(
@@ -1356,28 +1244,18 @@ var fi_jaris_plugin = fi_jaris_plugin || {};
 
         if (changed) {
 
+          changedAny =
+            true;
+
           const headerId =
             header$.attr(
               "id"
             );
+
           if (headerId) {
 
             changedHeaderIds.push(
               headerId
-            );
-
-          }
-
-
-          const groupKey =
-            getGroupKey(
-              header$
-            );
-
-          if (groupKey) {
-
-            changedGroupKeys.push(
-              groupKey
             );
 
           }
@@ -1398,7 +1276,7 @@ var fi_jaris_plugin = fi_jaris_plugin || {};
     /*
      * Emit one aggregate change event.
      */
-    if (changedGroupKeys.length) {
+    if (changedAny) {
 
       triggerChangeEvent(
         instance,
@@ -1417,8 +1295,6 @@ var fi_jaris_plugin = fi_jaris_plugin || {};
 
   /*
    * Expand every control-break group in one region.
-   *
-   * region must resolve to exactly one initialized region.
    */
   function expandAll(region) {
 
@@ -1433,8 +1309,6 @@ var fi_jaris_plugin = fi_jaris_plugin || {};
 
   /*
    * Collapse every control-break group in one region.
-   *
-   * region must resolve to exactly one initialized region.
    */
   function collapseAll(region) {
 
@@ -1482,8 +1356,8 @@ var fi_jaris_plugin = fi_jaris_plugin || {};
     const changedHeaderIds =
       [];
 
-    const changedGroupKeys =
-      [];
+    let changedAny =
+      false;
 
 
     getBreakHeaders(
@@ -1513,6 +1387,9 @@ var fi_jaris_plugin = fi_jaris_plugin || {};
 
         if (changed) {
 
+          changedAny =
+            true;
+
           const headerId =
             header$.attr(
               "id"
@@ -1522,20 +1399,6 @@ var fi_jaris_plugin = fi_jaris_plugin || {};
 
             changedHeaderIds.push(
               headerId
-            );
-
-          }
-
-
-          const groupKey =
-            getGroupKey(
-              header$
-            );
-
-          if (groupKey) {
-
-            changedGroupKeys.push(
-              groupKey
             );
 
           }
@@ -1560,7 +1423,7 @@ var fi_jaris_plugin = fi_jaris_plugin || {};
     /*
      * Emit one aggregate RESET event.
      */
-    if (changedGroupKeys.length) {
+    if (changedAny) {
 
       triggerChangeEvent(
         instance,
