@@ -6,6 +6,9 @@ var fi_jaris_plugin = fi_jaris_plugin || {};
 
   const instances = new WeakMap();
 
+  const DEFAULT_PLUGIN_NAME =
+    "IR Control Break Toggler";
+
   const STORAGE_PREFIX =
     "fi_jaris_plugin.irControlBreakToggler";
 
@@ -32,6 +35,20 @@ var fi_jaris_plugin = fi_jaris_plugin || {};
 
   const CHANGE_EVENT =
     "ircontrolbreakchange";
+
+
+  /*
+  * Return the Dynamic Action plug-in name for debug messages.
+  */
+  function getPluginName(daConfig) {
+
+    return (
+      daConfig &&
+      daConfig.action &&
+      daConfig.action.action
+    ) || DEFAULT_PLUGIN_NAME;
+
+  }
 
 
   /*
@@ -101,10 +118,23 @@ var fi_jaris_plugin = fi_jaris_plugin || {};
    * Public API methods intentionally operate on one IR at a time.
    * A selector matching multiple elements is rejected.
    */
-  function resolveRegion(region) {
+  function resolveRegion(
+    region,
+    pluginName
+  ) {
 
     const regions$ =
       resolveRegions(region);
+
+    if (regions$.length > 1) {
+
+      apex.debug.warn(
+        pluginName || DEFAULT_PLUGIN_NAME,
+        "Expected one region but multiple regions matched:",
+        regions$.length
+      );
+
+    }
 
     return regions$.length === 1
       ? regions$
@@ -118,14 +148,23 @@ var fi_jaris_plugin = fi_jaris_plugin || {};
    */
   function getStateStorage(
     regionId,
-    rememberState
+    rememberState,
+    pluginName
   ) {
 
-    if (
-      !regionId ||
-      rememberState === "NO"
-    ) {
+    if (rememberState === "NO") {
       return null;
+    }
+
+    if (!regionId) {
+
+      apex.debug.warn(
+        pluginName,
+        "Remember State is enabled, but the region has no ID."
+      );
+
+      return null;
+
     }
 
     const storageOptions = {
@@ -152,6 +191,12 @@ var fi_jaris_plugin = fi_jaris_plugin || {};
         );
 
     }
+
+    apex.debug.warn(
+      pluginName,
+      "Unsupported Remember State value:",
+      rememberState
+    );
 
     return null;
 
@@ -752,14 +797,14 @@ var fi_jaris_plugin = fi_jaris_plugin || {};
 
 
   /*
-   * Trigger one region-level change event.
-   *
-   * USER:
-   *   One current control-break header ID.
-   *
-   * EXPAND_ALL / COLLAPSE_ALL / RESET:
-   *   All changed current control-break header IDs in one event.
-   */
+  * Trigger one region-level change event.
+  *
+  * USER:
+  *   One current control-break header ID.
+  *
+  * EXPAND_ALL / COLLAPSE_ALL / RESET:
+  *   All changed current control-break header IDs in one event.
+  */
   function triggerChangeEvent(
     instance,
     headerIds,
@@ -767,22 +812,32 @@ var fi_jaris_plugin = fi_jaris_plugin || {};
     source
   ) {
 
+    const eventData = {
+      regionId:
+        instance.regionId,
+
+      headerIds:
+        headerIds,
+
+      expanded:
+        isExpanded,
+
+      source:
+        source
+    };
+
+    apex.debug.info(
+      instance.pluginName,
+      "Triggering event:",
+      CHANGE_EVENT,
+      "Event Data:",
+      eventData
+    );
+
     apex.event.trigger(
       instance.region$,
       CHANGE_EVENT,
-      {
-        regionId:
-          instance.regionId,
-
-        headerIds:
-          headerIds,
-
-        expanded:
-          isExpanded,
-
-        source:
-          source
-      }
+      eventData
     );
 
   }
@@ -897,7 +952,24 @@ var fi_jaris_plugin = fi_jaris_plugin || {};
    */
   function initializeGroups(instance) {
 
-    getBreakHeaders(instance)
+    const headers$ =
+      getBreakHeaders(
+        instance
+      );
+
+    if (!headers$.length) {
+
+      apex.debug.info(
+        instance.pluginName,
+        "No control-break groups found in region:",
+        instance.regionId
+      );
+
+      return;
+
+    }
+
+    headers$
       .each(function(groupIndex) {
 
         const header$ =
@@ -914,8 +986,8 @@ var fi_jaris_plugin = fi_jaris_plugin || {};
 
 
         /*
-         * Remembered state takes precedence.
-         */
+        * Remembered state takes precedence.
+        */
         if (
           instance.stateStorage &&
           groupKey &&
@@ -940,11 +1012,11 @@ var fi_jaris_plugin = fi_jaris_plugin || {};
 
 
         /*
-         * Initialization/restoration does not:
-         *
-         * - create remembered state entries
-         * - fire change events
-         */
+        * Initialization/restoration does not:
+        *
+        * - create remembered state entries
+        * - fire change events
+        */
         setGroupExpanded(
           instance,
           header$,
@@ -1012,23 +1084,53 @@ var fi_jaris_plugin = fi_jaris_plugin || {};
    *
    * Public API methods use this helper.
    */
-  function getInstance(region) {
+  function getInstance(
+    region,
+    pluginName
+  ) {
+
+    const debugName =
+      pluginName ||
+      DEFAULT_PLUGIN_NAME;
 
     const region$ =
       resolveRegion(
-        region
+        region,
+        debugName
       );
 
     if (!region$.length) {
+
+      apex.debug.error(
+        debugName,
+        "Public API call requires exactly one region.",
+        region
+      );
+
       return null;
+
     }
 
-    return instances.get(
-      region$[0]
-    ) || null;
+    const instance =
+      instances.get(
+        region$[0]
+      );
+
+    if (!instance) {
+
+      apex.debug.warn(
+        debugName,
+        "Region has not been initialized.",
+        region$[0]
+      );
+
+      return null;
+
+    }
+
+    return instance;
 
   }
-
 
   /*
    * Initialize one Interactive Report region.
@@ -1041,14 +1143,23 @@ var fi_jaris_plugin = fi_jaris_plugin || {};
    */
   function initInstance(
     region,
-    options
+    options,
+    pluginName
   ) {
 
     const region$ =
       $(region).first();
 
     if (!region$.length) {
+
+      apex.debug.error(
+        pluginName,
+        "Unable to initialize region.",
+        region
+      );
+
       return false;
+
     }
 
 
@@ -1060,12 +1171,12 @@ var fi_jaris_plugin = fi_jaris_plugin || {};
 
 
     /*
-     * When Expand Icon is empty, automatically select
-     * the directional icon based on:
-     *
-     * - Button Position
-     * - LTR / RTL direction
-     */
+    * When Expand Icon is empty, automatically select
+    * the directional icon based on:
+    *
+    * - Button Position
+    * - LTR / RTL direction
+    */
     if (!instanceOptions.expandIcon) {
 
       instanceOptions.expandIcon =
@@ -1089,13 +1200,17 @@ var fi_jaris_plugin = fi_jaris_plugin || {};
       regionId:
         regionId,
 
+      pluginName:
+        pluginName,
+
       options:
         instanceOptions,
 
       stateStorage:
         getStateStorage(
           regionId,
-          instanceOptions.rememberState
+          instanceOptions.rememberState,
+          pluginName
         ),
 
       storedState:
@@ -1109,9 +1224,6 @@ var fi_jaris_plugin = fi_jaris_plugin || {};
     );
 
 
-    /*
-     * Store this region as an independent plug-in instance.
-     */
     instances.set(
       region$[0],
       instance
@@ -1125,6 +1237,13 @@ var fi_jaris_plugin = fi_jaris_plugin || {};
 
     initializeGroups(
       instance
+    );
+
+
+    apex.debug.info(
+      pluginName,
+      "Initialized region:",
+      regionId
     );
 
 
@@ -1143,8 +1262,13 @@ var fi_jaris_plugin = fi_jaris_plugin || {};
    */
   function init(
     region,
-    options
+    options,
+    pluginName
   ) {
+
+    const debugName =
+      pluginName ||
+      DEFAULT_PLUGIN_NAME;
 
     const regions$ =
       resolveRegions(
@@ -1152,8 +1276,23 @@ var fi_jaris_plugin = fi_jaris_plugin || {};
       );
 
     if (!regions$.length) {
+
+      apex.debug.error(
+        debugName,
+        "Initialization target did not resolve to any regions.",
+        region
+      );
+
       return false;
+
     }
+
+
+    apex.debug.info(
+      debugName,
+      "Initializing regions:",
+      regions$.length
+    );
 
 
     let initialized =
@@ -1166,7 +1305,8 @@ var fi_jaris_plugin = fi_jaris_plugin || {};
         if (
           initInstance(
             this,
-            options
+            options,
+            debugName
           )
         ) {
 
@@ -1193,12 +1333,14 @@ var fi_jaris_plugin = fi_jaris_plugin || {};
   function setAllExpanded(
     region,
     isExpanded,
-    source
+    source,
+    pluginName
   ) {
 
     const instance =
       getInstance(
-        region
+        region,
+        pluginName
       );
 
     if (!instance) {
@@ -1296,12 +1438,16 @@ var fi_jaris_plugin = fi_jaris_plugin || {};
   /*
    * Expand every control-break group in one region.
    */
-  function expandAll(region) {
+  function expandAll(
+    region,
+    pluginName
+  ) {
 
     return setAllExpanded(
       region,
       true,
-      "EXPAND_ALL"
+      "EXPAND_ALL",
+      pluginName
     );
 
   }
@@ -1310,12 +1456,16 @@ var fi_jaris_plugin = fi_jaris_plugin || {};
   /*
    * Collapse every control-break group in one region.
    */
-  function collapseAll(region) {
+  function collapseAll(
+    region,
+    pluginName
+  ) {
 
     return setAllExpanded(
       region,
       false,
-      "COLLAPSE_ALL"
+      "COLLAPSE_ALL",
+      pluginName
     );
 
   }
@@ -1330,11 +1480,15 @@ var fi_jaris_plugin = fi_jaris_plugin || {};
    * One RESET event is emitted if one or more current groups
    * actually change state.
    */
-  function resetState(region) {
+  function resetState(
+    region,
+    pluginName
+  ) {
 
     const instance =
       getInstance(
-        region
+        region,
+        pluginName
       );
 
     if (!instance) {
@@ -1468,32 +1622,146 @@ var fi_jaris_plugin = fi_jaris_plugin || {};
   };
 
 
-})(apex.jQuery, fi_jaris_plugin);
+  /*
+  * The Dynamic Action should normally be created with:
+  *
+  *   Event: After Refresh
+  *
+  * A Region selection normally supplies one triggering IR.
+  *
+  * A jQuery Selector can supply one or more matching IRs;
+  * init() treats each as an independent plug-in instance.
+  *
+  * No Affected Elements configuration is required because
+  * the plug-in uses daConfig.triggeringElement.
+  */
+  window.irControlBreakTogglerInit = (
+    settings,
+    daConfig
+  ) => {
+
+    const pluginName =
+      getPluginName(
+        daConfig
+      );
+
+    plugin.ir
+      .controlBreakToggler
+      .init(
+        daConfig.triggeringElement,
+        settings,
+        pluginName
+      );
+
+  };
 
 
-/*
- * The Dynamic Action should normally be created with:
- *
- *   Event: After Refresh
- *
- * A Region selection normally supplies one triggering IR.
- *
- * A jQuery Selector can supply one or more matching IRs;
- * init() treats each as an independent plug-in instance.
- *
- * No Affected Elements configuration is required because
- * the plug-in uses daConfig.triggeringElement.
- */
-window.irControlBreakTogglerInit = (
-  settings,
-  daConfig
-) => {
+  /*
+  * Dynamic Action entry point for declarative control-break actions.
+  *
+  * Intended for use with an Oracle APEX Button Trigger Action.
+  *
+  * The button is the triggering element, while the target Interactive
+  * Report is supplied through the Dynamic Action Affected Elements.
+  *
+  * Supported actions:
+  *
+  *   EXPAND_ALL
+  *   COLLAPSE_ALL
+  *   RESET_STATE
+  *
+  * The affected region must already have been initialized by the
+  * IR Control Break Toggler plug-in.
+  */
+  window.irControlBreakTogglerAction = (
+    settings,
+    daConfig
+  ) => {
 
-  fi_jaris_plugin.ir
-    .controlBreakToggler
-    .init(
-      daConfig.triggeringElement,
-      settings
+    const pluginName =
+      getPluginName(
+        daConfig
+      );
+
+    const api =
+      plugin.ir
+        .controlBreakToggler;
+
+    const region$ =
+      $(daConfig.affectedElements);
+
+
+    if (!region$.length) {
+
+      apex.debug.error(
+        pluginName,
+        "Button Action requires an affected Interactive Report region."
+      );
+
+      return false;
+
+    }
+
+
+    if (region$.length !== 1) {
+
+      apex.debug.error(
+        pluginName,
+        "Button Action requires exactly one affected region. Matched:",
+        region$.length
+      );
+
+      return false;
+
+    }
+
+
+    apex.debug.info(
+      pluginName,
+      "Executing Button Action:",
+      settings.action,
+      region$[0]
     );
 
-};
+
+    switch (settings.action) {
+
+      case "EXPAND_ALL":
+
+        return api.expandAll(
+          region$,
+          pluginName
+        );
+
+
+      case "COLLAPSE_ALL":
+
+        return api.collapseAll(
+          region$,
+          pluginName
+        );
+
+
+      case "RESET_STATE":
+
+        return api.resetState(
+          region$,
+          pluginName
+        );
+
+
+      default:
+
+        apex.debug.warn(
+          pluginName,
+          "Unsupported Button Action:",
+          settings.action
+        );
+
+        return false;
+
+    }
+
+  };
+
+})(apex.jQuery, fi_jaris_plugin);

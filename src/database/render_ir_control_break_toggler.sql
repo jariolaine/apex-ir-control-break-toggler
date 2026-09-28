@@ -20,19 +20,21 @@ as
 
 begin
 
-  -- Application-scope attributes with defaults.
-  l_collapse_icon :=
-    p_plugin.attributes.get_varchar2(
-      p_static_id     => 'collapse_icon'
-    , p_default_value => l_collapse_icon
-    );
-
+  -- Application-scope attributes with default values.
+  -- Note: The expand button's default icon is handled via JavaScript and
+  -- is intentionally left out from this PL/SQL procedure.
   l_collapse_title :=
     p_plugin.attributes.get_varchar2(
       p_static_id                 => 'collapse_title'
     , p_default_value             => l_collapse_title
     , p_do_substitutions          => true
     , p_substitutions_escape_mode => apex_session_state.c_escape_mode_raw
+    );
+
+  l_collapse_icon :=
+    p_plugin.attributes.get_varchar2(
+      p_static_id     => 'collapse_icon'
+    , p_default_value => l_collapse_icon
     );
 
   l_expand_title :=
