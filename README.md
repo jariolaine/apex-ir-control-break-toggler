@@ -33,6 +33,13 @@ adds expand/collapse controls to control-break groups in an Interactive Report.
 
 ## Usage
 
+Download the latest plug-in export
+`dynamic_action_plugin_fi_jaris_ir_control_break_toggler.sql` from the
+[GitHub Releases](https://github.com/jariolaine/apex-ir-control-break-toggler/releases/latest)
+page.
+
+Import it into Shared Components > Plug-ins.
+
 For a typical single Interactive Report, create the Dynamic Action on the
 report region.
 
