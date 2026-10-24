@@ -20,6 +20,13 @@ as
 
 begin
 
+  if apex_application.g_debug then
+    apex_plugin_util.debug_dynamic_action(
+      p_plugin          => p_plugin
+    , p_dynamic_action  => p_dynamic_action
+    );
+  end if;
+
   -- Application-scope attributes with default values.
   -- Note: The expand button's default icon is handled via JavaScript and
   -- is intentionally left out from this PL/SQL procedure.

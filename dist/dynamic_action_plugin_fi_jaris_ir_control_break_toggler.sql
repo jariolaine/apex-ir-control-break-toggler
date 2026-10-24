@@ -19,28 +19,28 @@ whenever sqlerror exit sql.sqlcode rollback
 begin
 wwv_flow_imp.import_begin (
  p_version_yyyy_mm_dd=>'2026.03.30'
-,p_release=>'26.1.4'
+,p_release=>'26.1.5'
 ,p_default_workspace_id=>6206094152582709
-,p_default_application_id=>104
+,p_default_application_id=>800
 ,p_default_id_offset=>0
 ,p_default_owner=>'WKSP_SANDBOX'
 );
 end;
 /
  
-prompt APPLICATION 104 - Allama
+prompt APPLICATION 800 - Plugins Development
 --
 -- Application Export:
---   Application:     104
---   Name:            Allama
---   Date and Time:   12:45 Monday September 28, 2026
+--   Application:     800
+--   Name:            Plugins Development
+--   Date and Time:   09:23 Saturday October 24, 2026
 --   Exported By:     JARI
 --   Flashback:       0
 --   Export Type:     Component Export
 --   Manifest
---     PLUGIN: 18583403628066902
+--     PLUGIN: 29360837458947688
 --   Manifest End
---   Version:         26.1.4
+--   Version:         26.1.5
 --   Instance ID:     2400104630176441
 --
 
@@ -52,7 +52,7 @@ end;
 prompt --application/shared_components/plugins/dynamic_action/fi_jaris_ir_control_break_toggler
 begin
 wwv_flow_imp_shared.create_plugin(
- p_id=>wwv_flow_imp.id(18583403628066902)
+ p_id=>wwv_flow_imp.id(29360837458947688)
 ,p_plugin_type=>'DYNAMIC ACTION'
 ,p_name=>'FI.JARIS.IR_CONTROL_BREAK_TOGGLER'
 ,p_display_name=>'IR Control Break Toggler'
@@ -82,6 +82,13 @@ wwv_flow_imp_shared.create_plugin(
 '    ''t-Button t-Button--noLabel t-Button--icon t-Button--small'';',
 '',
 'begin',
+'',
+'  if apex_application.g_debug then',
+'    apex_plugin_util.debug_dynamic_action(',
+'      p_plugin          => p_plugin',
+'    , p_dynamic_action  => p_dynamic_action',
+'    );',
+'  end if;',
 '',
 '  -- Application-scope attributes with default values.',
 '  -- Note: The expand button''s default icon is handled via JavaScript and',
@@ -176,7 +183,7 @@ wwv_flow_imp_shared.create_plugin(
 ,p_api_version=>3
 ,p_render_function=>'render_ir_control_break_toggler'
 ,p_standard_attributes=>'ONLOAD'
-,p_version_scn=>'SH256:WBrH21RIxhp0vH7TnSMW-Ctcd4XWvICMv-rUDEV_RZA'
+,p_version_scn=>'SH256:MIQ2a5RDAtYxLFABS1KxjgFrZ33jxtUQHSuxqOT0KT4'
 ,p_help_text=>wwv_flow_string.join(wwv_flow_t_varchar2(
 '<p>',
 'Adds expand and collapse controls to control-break groups in an',
@@ -224,13 +231,13 @@ wwv_flow_imp_shared.create_plugin(
 '<p>',
 'If the Interactive Report contains no control breaks, the plug-in makes no changes.',
 '</p>'))
-,p_version_identifier=>'1.1.0'
+,p_version_identifier=>'1.1.1'
 ,p_about_url=>'https://github.com/jariolaine/apex-ir-control-break-toggler'
 ,p_files_version=>2461312123547
 );
 wwv_flow_imp_shared.create_plugin_attribute(
- p_id=>wwv_flow_imp.id(18994955341614880)
-,p_plugin_id=>wwv_flow_imp.id(18583403628066902)
+ p_id=>wwv_flow_imp.id(29772389172495666)
+,p_plugin_id=>wwv_flow_imp.id(29360837458947688)
 ,p_attribute_scope=>'APPLICATION'
 ,p_attribute_sequence=>5
 ,p_display_sequence=>50
@@ -261,8 +268,8 @@ wwv_flow_imp_shared.create_plugin_attribute(
 '</p>'))
 );
 wwv_flow_imp_shared.create_plugin_attribute(
- p_id=>wwv_flow_imp.id(20027962677875283)
-,p_plugin_id=>wwv_flow_imp.id(18583403628066902)
+ p_id=>wwv_flow_imp.id(30805396508756069)
+,p_plugin_id=>wwv_flow_imp.id(29360837458947688)
 ,p_attribute_scope=>'COMPONENT'
 ,p_attribute_sequence=>3
 ,p_display_sequence=>30
@@ -291,8 +298,8 @@ wwv_flow_imp_shared.create_plugin_attribute(
 '</p>'))
 );
 wwv_flow_imp_shared.create_plugin_attr_value(
- p_id=>wwv_flow_imp.id(20029231724880278)
-,p_plugin_attribute_id=>wwv_flow_imp.id(20027962677875283)
+ p_id=>wwv_flow_imp.id(30806665555761064)
+,p_plugin_attribute_id=>wwv_flow_imp.id(30805396508756069)
 ,p_display_sequence=>20
 ,p_display_value=>'End'
 ,p_return_value=>'END'
@@ -308,8 +315,8 @@ wwv_flow_imp_shared.create_plugin_attr_value(
 '</p>'))
 );
 wwv_flow_imp_shared.create_plugin_attr_value(
- p_id=>wwv_flow_imp.id(20028896735879458)
-,p_plugin_attribute_id=>wwv_flow_imp.id(20027962677875283)
+ p_id=>wwv_flow_imp.id(30806330566760244)
+,p_plugin_attribute_id=>wwv_flow_imp.id(30805396508756069)
 ,p_display_sequence=>10
 ,p_display_value=>'Start'
 ,p_return_value=>'START'
@@ -324,8 +331,8 @@ wwv_flow_imp_shared.create_plugin_attr_value(
 '</p>'))
 );
 wwv_flow_imp_shared.create_plugin_attribute(
- p_id=>wwv_flow_imp.id(18990460389595400)
-,p_plugin_id=>wwv_flow_imp.id(18583403628066902)
+ p_id=>wwv_flow_imp.id(29767894220476186)
+,p_plugin_id=>wwv_flow_imp.id(29360837458947688)
 ,p_attribute_scope=>'APPLICATION'
 ,p_attribute_sequence=>2
 ,p_display_sequence=>20
@@ -359,8 +366,8 @@ wwv_flow_imp_shared.create_plugin_attribute(
 '</p>'))
 );
 wwv_flow_imp_shared.create_plugin_attribute(
- p_id=>wwv_flow_imp.id(18985218326548506)
-,p_plugin_id=>wwv_flow_imp.id(18583403628066902)
+ p_id=>wwv_flow_imp.id(29762652157429292)
+,p_plugin_id=>wwv_flow_imp.id(29360837458947688)
 ,p_attribute_scope=>'APPLICATION'
 ,p_attribute_sequence=>1
 ,p_display_sequence=>10
@@ -402,8 +409,8 @@ wwv_flow_imp_shared.create_plugin_attribute(
 '</p>'))
 );
 wwv_flow_imp_shared.create_plugin_attribute(
- p_id=>wwv_flow_imp.id(18991423814602923)
-,p_plugin_id=>wwv_flow_imp.id(18583403628066902)
+ p_id=>wwv_flow_imp.id(29768857645483709)
+,p_plugin_id=>wwv_flow_imp.id(29360837458947688)
 ,p_attribute_scope=>'APPLICATION'
 ,p_attribute_sequence=>4
 ,p_display_sequence=>40
@@ -438,8 +445,8 @@ wwv_flow_imp_shared.create_plugin_attribute(
 '</p>'))
 );
 wwv_flow_imp_shared.create_plugin_attribute(
- p_id=>wwv_flow_imp.id(18988065901568817)
-,p_plugin_id=>wwv_flow_imp.id(18583403628066902)
+ p_id=>wwv_flow_imp.id(29765499732449603)
+,p_plugin_id=>wwv_flow_imp.id(29360837458947688)
 ,p_attribute_scope=>'APPLICATION'
 ,p_attribute_sequence=>3
 ,p_display_sequence=>30
@@ -485,8 +492,8 @@ wwv_flow_imp_shared.create_plugin_attribute(
 '</p>'))
 );
 wwv_flow_imp_shared.create_plugin_attribute(
- p_id=>wwv_flow_imp.id(18586545522148016)
-,p_plugin_id=>wwv_flow_imp.id(18583403628066902)
+ p_id=>wwv_flow_imp.id(29363979353028802)
+,p_plugin_id=>wwv_flow_imp.id(29360837458947688)
 ,p_attribute_scope=>'COMPONENT'
 ,p_attribute_sequence=>1
 ,p_display_sequence=>10
@@ -524,8 +531,8 @@ unistr('<li><strong>No</strong> \2014 initially display control-break groups col
 '</p>'))
 );
 wwv_flow_imp_shared.create_plugin_attribute(
- p_id=>wwv_flow_imp.id(20004569551275381)
-,p_plugin_id=>wwv_flow_imp.id(18583403628066902)
+ p_id=>wwv_flow_imp.id(30782003382156167)
+,p_plugin_id=>wwv_flow_imp.id(29360837458947688)
 ,p_attribute_scope=>'COMPONENT'
 ,p_attribute_sequence=>2
 ,p_display_sequence=>20
@@ -558,8 +565,8 @@ wwv_flow_imp_shared.create_plugin_attribute(
 '</p>'))
 );
 wwv_flow_imp_shared.create_plugin_attr_value(
- p_id=>wwv_flow_imp.id(20010302028409248)
-,p_plugin_attribute_id=>wwv_flow_imp.id(20004569551275381)
+ p_id=>wwv_flow_imp.id(30787735859290034)
+,p_plugin_attribute_id=>wwv_flow_imp.id(30782003382156167)
 ,p_display_sequence=>10
 ,p_display_value=>'Do Not Remember'
 ,p_return_value=>'NO'
@@ -575,8 +582,8 @@ wwv_flow_imp_shared.create_plugin_attr_value(
 '</p>'))
 );
 wwv_flow_imp_shared.create_plugin_attr_value(
- p_id=>wwv_flow_imp.id(20011112866411821)
-,p_plugin_attribute_id=>wwv_flow_imp.id(20004569551275381)
+ p_id=>wwv_flow_imp.id(30788546697292607)
+,p_plugin_attribute_id=>wwv_flow_imp.id(30782003382156167)
 ,p_display_sequence=>30
 ,p_display_value=>'Future Sessions'
 ,p_return_value=>'PERSISTENT'
@@ -597,8 +604,8 @@ wwv_flow_imp_shared.create_plugin_attr_value(
 '</p>'))
 );
 wwv_flow_imp_shared.create_plugin_attr_value(
- p_id=>wwv_flow_imp.id(20010719929410415)
-,p_plugin_attribute_id=>wwv_flow_imp.id(20004569551275381)
+ p_id=>wwv_flow_imp.id(30788153760291201)
+,p_plugin_attribute_id=>wwv_flow_imp.id(30782003382156167)
 ,p_display_sequence=>20
 ,p_display_value=>'Browser Session'
 ,p_return_value=>'SESSION'
@@ -614,8 +621,8 @@ wwv_flow_imp_shared.create_plugin_attr_value(
 '</p>'))
 );
 wwv_flow_imp_shared.create_plugin_event(
- p_id=>wwv_flow_imp.id(20041347097185401)
-,p_plugin_id=>wwv_flow_imp.id(18583403628066902)
+ p_id=>wwv_flow_imp.id(30818780928066187)
+,p_plugin_id=>wwv_flow_imp.id(29360837458947688)
 ,p_name=>'ircontrolbreakchange'
 ,p_display_name=>'Control Break Change'
 );
@@ -631,8 +638,8 @@ end;
 /
 begin
 wwv_flow_imp_shared.create_plugin_file(
- p_id=>wwv_flow_imp.id(20035361987976215)
-,p_plugin_id=>wwv_flow_imp.id(18583403628066902)
+ p_id=>wwv_flow_imp.id(30812795818857001)
+,p_plugin_id=>wwv_flow_imp.id(29360837458947688)
 ,p_file_name=>'irControlBreakToggler.css'
 ,p_mime_type=>'text/css'
 ,p_file_charset=>'utf-8'
@@ -930,8 +937,8 @@ end;
 /
 begin
 wwv_flow_imp_shared.create_plugin_file(
- p_id=>wwv_flow_imp.id(18583952308114475)
-,p_plugin_id=>wwv_flow_imp.id(18583403628066902)
+ p_id=>wwv_flow_imp.id(29361386138995261)
+,p_plugin_id=>wwv_flow_imp.id(29360837458947688)
 ,p_file_name=>'irControlBreakToggler.js'
 ,p_mime_type=>'text/javascript'
 ,p_file_charset=>'utf-8'
@@ -949,8 +956,8 @@ end;
 /
 begin
 wwv_flow_imp_shared.create_plugin_file(
- p_id=>wwv_flow_imp.id(20037120166011243)
-,p_plugin_id=>wwv_flow_imp.id(18583403628066902)
+ p_id=>wwv_flow_imp.id(30814553996892029)
+,p_plugin_id=>wwv_flow_imp.id(29360837458947688)
 ,p_file_name=>'irControlBreakToggler.min.css'
 ,p_mime_type=>'text/css'
 ,p_file_charset=>'utf-8'
@@ -1035,8 +1042,8 @@ end;
 /
 begin
 wwv_flow_imp_shared.create_plugin_file(
- p_id=>wwv_flow_imp.id(18584799470115924)
-,p_plugin_id=>wwv_flow_imp.id(18583403628066902)
+ p_id=>wwv_flow_imp.id(29362233300996710)
+,p_plugin_id=>wwv_flow_imp.id(29360837458947688)
 ,p_file_name=>'irControlBreakToggler.min.js'
 ,p_mime_type=>'text/javascript'
 ,p_file_charset=>'utf-8'

@@ -7,6 +7,13 @@ create or replace procedure render_ir_control_break_action(
 as
 begin
 
+  if apex_application.g_debug then
+    apex_plugin_util.debug_dynamic_action(
+      p_plugin          => p_plugin
+    , p_dynamic_action  => p_dynamic_action
+    );
+  end if;
+
   p_result.function_name :=
     'irControlBreakTogglerAction';
 

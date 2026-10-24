@@ -19,28 +19,28 @@ whenever sqlerror exit sql.sqlcode rollback
 begin
 wwv_flow_imp.import_begin (
  p_version_yyyy_mm_dd=>'2026.03.30'
-,p_release=>'26.1.4'
+,p_release=>'26.1.5'
 ,p_default_workspace_id=>6206094152582709
-,p_default_application_id=>104
+,p_default_application_id=>800
 ,p_default_id_offset=>0
 ,p_default_owner=>'WKSP_SANDBOX'
 );
 end;
 /
  
-prompt APPLICATION 104 - Allama
+prompt APPLICATION 800 - Plugins Development
 --
 -- Application Export:
---   Application:     104
---   Name:            Allama
---   Date and Time:   12:45 Monday September 28, 2026
+--   Application:     800
+--   Name:            Plugins Development
+--   Date and Time:   09:23 Saturday October 24, 2026
 --   Exported By:     JARI
 --   Flashback:       0
 --   Export Type:     Component Export
 --   Manifest
---     PLUGIN: 10723274034146833
+--     PLUGIN: 21499779850023561
 --   Manifest End
---   Version:         26.1.4
+--   Version:         26.1.5
 --   Instance ID:     2400104630176441
 --
 
@@ -52,9 +52,9 @@ end;
 prompt --application/shared_components/plugins/dynamic_action/fi_jaris_ir_control_break_action
 begin
 wwv_flow_imp_shared.create_plugin(
- p_id=>wwv_flow_imp.id(10723274034146833)
+ p_id=>wwv_flow_imp.id(21499779850023561)
 ,p_plugin_type=>'DYNAMIC ACTION'
-,p_name=>'FI.JARIS.IR.CONTROL_BREAK_ACTION'
+,p_name=>'FI.JARIS.IR_CONTROL_BREAK_ACTION'
 ,p_display_name=>'IR Control Break Action'
 ,p_apexlang_name=>'irControlBreakAction'
 ,p_category=>'COMPONENT'
@@ -67,6 +67,13 @@ wwv_flow_imp_shared.create_plugin(
 ')',
 'as',
 'begin',
+'',
+'  if apex_application.g_debug then',
+'    apex_plugin_util.debug_dynamic_action(',
+'      p_plugin          => p_plugin',
+'    , p_dynamic_action  => p_dynamic_action',
+'    );',
+'  end if;',
 '',
 '  p_result.function_name :=',
 '    ''irControlBreakTogglerAction'';',
@@ -86,7 +93,7 @@ wwv_flow_imp_shared.create_plugin(
 ,p_api_version=>3
 ,p_render_function=>'render_ir_control_break_action'
 ,p_standard_attributes=>'REGION:REQUIRED'
-,p_version_scn=>'SH256:nKfnzbnQaXUxyN-eEPSh1AchD27u19IGyR9ufWyiSTA'
+,p_version_scn=>'SH256:amZAzIKqG8Sgco_XJghvDAxkpgzgRrFScnCNOFW0EaM'
 ,p_help_text=>wwv_flow_string.join(wwv_flow_t_varchar2(
 '<p>',
 'Performs an action on an Interactive Report initialized by the',
@@ -103,13 +110,13 @@ wwv_flow_imp_shared.create_plugin(
 'The target Interactive Report must already be initialized by the',
 '<strong>IR Control Break Toggler</strong> plug-in.',
 '</p>'))
-,p_version_identifier=>'1.1.0'
+,p_version_identifier=>'1.1.1'
 ,p_about_url=>'https://github.com/jariolaine/apex-ir-control-break-toggler'
 ,p_files_version=>2461312095636
 );
 wwv_flow_imp_shared.create_plugin_attribute(
- p_id=>wwv_flow_imp.id(10723695224154677)
-,p_plugin_id=>wwv_flow_imp.id(10723274034146833)
+ p_id=>wwv_flow_imp.id(21500201040031405)
+,p_plugin_id=>wwv_flow_imp.id(21499779850023561)
 ,p_attribute_scope=>'COMPONENT'
 ,p_attribute_sequence=>1
 ,p_display_sequence=>10
@@ -146,24 +153,24 @@ unistr('    <strong>Reset State</strong> \2014 clears remembered state and resto
 '</ul>'))
 );
 wwv_flow_imp_shared.create_plugin_attr_value(
- p_id=>wwv_flow_imp.id(10724822582160429)
-,p_plugin_attribute_id=>wwv_flow_imp.id(10723695224154677)
+ p_id=>wwv_flow_imp.id(21501328398037157)
+,p_plugin_attribute_id=>wwv_flow_imp.id(21500201040031405)
 ,p_display_sequence=>20
 ,p_display_value=>'Collapse All'
 ,p_return_value=>'COLLAPSE_ALL'
 ,p_apexlang_name=>'collapseAll'
 );
 wwv_flow_imp_shared.create_plugin_attr_value(
- p_id=>wwv_flow_imp.id(10724433869159145)
-,p_plugin_attribute_id=>wwv_flow_imp.id(10723695224154677)
+ p_id=>wwv_flow_imp.id(21500939685035873)
+,p_plugin_attribute_id=>wwv_flow_imp.id(21500201040031405)
 ,p_display_sequence=>10
 ,p_display_value=>'Expand All'
 ,p_return_value=>'EXPAND_ALL'
 ,p_apexlang_name=>'expandAll'
 );
 wwv_flow_imp_shared.create_plugin_attr_value(
- p_id=>wwv_flow_imp.id(10725255911161723)
-,p_plugin_attribute_id=>wwv_flow_imp.id(10723695224154677)
+ p_id=>wwv_flow_imp.id(21501761727038451)
+,p_plugin_attribute_id=>wwv_flow_imp.id(21500201040031405)
 ,p_display_sequence=>30
 ,p_display_value=>'Reset State'
 ,p_return_value=>'RESET_STATE'

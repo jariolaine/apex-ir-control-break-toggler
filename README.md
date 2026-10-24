@@ -3,15 +3,14 @@
 **IR Control Break Toggler** is a Dynamic Action plug-in for Oracle APEX that
 adds expand/collapse controls to control-break groups in an Interactive Report.
 
-Release 1.1.0 also includes the optional **IR Control Break Action** companion
-plug-in for declarative APEX 26.1 Button Trigger Actions such as Expand All,
+Includes the optional **IR Control Break Action** companion
+plug-in for declarative APEX Button Trigger Actions such as Expand All,
 Collapse All, and Reset State.
 
 ## Compatibility
 
 - Oracle APEX 26.1 or later
 - Interactive Report regions
-- Release version: **1.1.0**
 
 ## Features
 
@@ -260,7 +259,7 @@ the `ircontrolbreakchange` event.
 
 ## Declarative Button Trigger Actions
 
-The optional **IR Control Break Action** plug-in provides declarative APEX 26.1
+The optional **IR Control Break Action** plug-in provides declarative APEX
 Button Trigger Actions without page-level JavaScript.
 
 The target Interactive Report must already be initialized by
